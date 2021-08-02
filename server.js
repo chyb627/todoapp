@@ -4,7 +4,7 @@ const bodyParser= require('body-parser') //body-parser는 요청데이터 해석
 app.use(bodyParser.urlencoded({extended: true})) 
 const MongoClient = require('mongodb').MongoClient;
 app.set('view engine', 'ejs');
-
+app.use('/public', express.static('public')); //static파일을 보관하기위해 public폴더를 쓰겠다
 
 
 var db;
@@ -30,13 +30,21 @@ app.get('/pet', function(요청, 응답){   //PET 경로로의 GET요청을 처�
     응답.send('펫용품 쇼핑할 수 있는 페이지입니다.');  //서버를 하나 만든 것
 });
 
-app.get('/', function(요청, 응답){   
-    응답.sendFile(__dirname + '/index.html');   // .sendFile(보낼파일경로)
-});
+app.get('/', function(요청, 응답){
+    응답.render('index.ejs')
+})
 
-app.get('/write', function(요청, 응답){   
-    응답.sendFile(__dirname + '/write.html');   // .sendFile(보낼파일경로)
-});
+app.get('/write', function(요청, 응답){
+    응답.render('write.ejs')
+})
+
+// app.get('/', function(요청, 응답){   
+//     응답.sendFile(__dirname + '/index.ejs');   // .sendFile(보낼파일경로)
+// });
+
+// app.get('/write', function(요청, 응답){   
+//     응답.sendFile(__dirname + '/write.ejs');   // .sendFile(보낼파일경로)
+// });
 
 // 어떤 사람이 /add 경로로 POST 요청을 하면 ~를 해주세요 -->코드로 작성
 // app.post('/add', function(요청, 응답){
@@ -83,3 +91,29 @@ app.get('/list', function(요청, 응답){
     
 });
 
+app.delete('/delete', function(요청, 응답){
+    console.log(요청.body);
+    요청.body._id = parseInt(요청.body._id);
+    //요청.body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 "이승기-삭제"
+    db.collection('post').deleteOne(요청.body, function(에러, 결과){  //삭제해주는 고마운 함수
+        console.log('삭제완료');
+        응답.status(200).send({ message : '성공했습니다' });
+    }) 
+})
+
+
+// /detail/1 로 접속하면 1번게시물을 보여줌
+// /detail/2 로 접속하면 2번게시물을 보여줌
+app.get('/detail/:id', function(요청, 응답){ 
+    db.collection('post').findOne({ _id : parseInt(요청.params.id)},function(에러, 결과){
+        //console.log(결과);
+        응답.render('detail.ejs', {data : 결과})
+
+    })
+    
+});
+
+
+app.get('/edit', function(요청, 응답){
+    응답.render('edit.ejs')
+})

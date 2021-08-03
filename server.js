@@ -1,5 +1,5 @@
-const express = require('express'); //라이브러리를 첨부
-const app = express(); //새로운 객체를 만든다
+const express = require('express'); //라이브러리를 첨부해줘!
+const app = express(); //라이브러리를 이용해서 새로운 객체를 만들어줘!
 const bodyParser= require('body-parser') //body-parser는 요청데이터 해석을 쉽게 도와준다
 app.use(bodyParser.urlencoded({extended: true})) 
 const MongoClient = require('mongodb').MongoClient;
@@ -20,6 +20,8 @@ MongoClient.connect('mongodb+srv://chyb627:!cha159632@chabiri.r7lh7.mongodb.net/
     //     console.log('저장완료');
     // }); 
 
+    //app. listen으로 서버를 열수 있고, 어디다 열지 정해주기.
+    //app. listen (서버띄울 포트번호, 띄운 후 실행할 코드 )
     app.listen(8080, function(){          // database 접속이 완료되면
         console.log('listening on 8080')  // 내부 코드를 실행해라(노드js 서버 띄우는 코드)
     });

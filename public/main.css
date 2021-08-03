@@ -1,3 +1,101 @@
-h4{
-    font-family: '나눔바른고딕';
+:root {
+    --text-color: #f0f4f5;
+    --background-color: #263343;
+    --accent-color: #d49466;
+} 
+
+body{
+    margin:0; /*스페이싱이 사라짐 아래위 여백이 사라짐*/
+    font-family: 'Source Sans Pro' 
+}
+
+a{
+    text-decoration: none; /*밑줄과 색이 변해있는걸 없애줌*/
+    color: var(--text-color); /*색 변경*/
+}
+
+.navbar{
+    display: flex; /* flex box로 보여줘, 아이템들이 한줄에 나란히 들어옴 */
+    justify-content: space-between;/* space를 사이사이에 넣어준다 */
+    align-items: center; /*아이템들을 수직적으로 중간으로 배치 */
+    background-color: var(--background-color); /*베경 색*/
+    padding: 8px 12px; /*아이템들이 양모서리에 붙어 있기때문에 패딩을 줌 위8 양옆12px */
+}
+
+.navbar__logo{
+    font-size: 24px;
+    color: var(--text-color);
+}
+
+.navbar__logo i {
+    color: var(--accent-color);  /*로고 색 지정*/
+}
+
+.navbar__menu {
+    display: flex;  /*한줄에 하나씩 나오게*/
+    list-style: none;  /*dot (디스크 모양)의 꾸밈새를 없애줌*/
+    padding-left: 0;  /*패딩을 없애 정말 중간으로 오게함*/
+}
+
+.navbar__menu li{
+    padding: 8px 12px;
+}
+
+.navbar__menu li:hover {
+    background-color: var(--accent-color);
+    border-radius: 4px;
+}
+
+.navbar__icons{
+    list-style: none;
+    color: var(--text-color);
+    display: flex;
+    padding-left: 0;  /*패딩을 없애 정말 중간으로 오게함*/
+}
+
+.navbar__icons li{
+    padding: 8px 12px;
+}
+
+.navbar__toogleBtn{
+    display: none;
+    position: absolute; 
+    right: 32px;
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+/*레이아웃을 반응형으로 바꿈 어느정도 줄어들면 형식을 바꿈 창이작아지면 밑으로 내리기*/
+@media screen and (max-width: 768px){
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 8px 24px;
+    }
+    .navbar__menu{
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .navbar__menu li {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .navbar__icons{
+        display: none;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .navbar__toogleBtn{
+        display: block;
+    }
+
+    .navbar__menu.active,
+    .navbar__icons.active {
+        display:flex;
+    }
 }

@@ -9,14 +9,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/main.css">
   <link rel="icon" href="/public/image/favicon.png">
-  <title>CHA STORE</title>
+  <title>자기관리앱, TODO APP</title>
   <script src="https://kit.fontawesome.com/9c2eaededc.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
   <!-- nav.html을 첨부해줘 ejs파일에서만가능 아니면 jquery써야함-->
   <%- include('nav.html') %>
-    <h4>홈입니다.</h4>
+
+    <section class="index-form">
+      <h1>자기관리 일정 짜기, 지금시작!</h1>
+      <h2>내가 원하는 방식으로 일정을 생성, 디자인, 관리</h2>
+      <h2> 할 수 있는 자유를 제공 하는 플랫폼을 경험하세요.</h2>
+      <div class="btn-area">
+        <button type="submit" onclick = "location.href = 'signup'">시작하기</button>
+      </div><br>
+      <div class="img-area">
+      <img src="/public/image/manage.jpeg" ></div>
+    </section>
+
+
+
 
     <script src="/public/main.js" defer></script>
 </body>

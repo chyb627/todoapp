@@ -62,7 +62,7 @@ app.get('/write', function (요청, 응답) {
 // 이 때, 'POST'라는 이름을 가진 collection에 두개 데이터를 저장하기
 // {제목:'' , 날짜:''}
 app.post('/add', function (요청, 응답) {
-  응답.send('전송완료');
+  응답.send('전송완료 list 목록에서 확인하세요');
 
   db.collection('counter').findOne({ name: '게시물갯수' }, function (에러, 결과) {
     console.log(결과.totalPost)

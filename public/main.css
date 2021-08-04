@@ -175,3 +175,18 @@ a{
     text-decoration:none;
 }
 
+/*--------------------------------index----------------------------*/
+
+.index-form h1 {
+    font-size: 64px; color: #000;
+    text-align: center;
+    margin-top: 60px;
+}
+
+.index-form h2 {
+    font-size: 32px; color: #000;
+    text-align: center;
+    margin-top: 60px;
+}
+
+.img-area {text-align: center; overflow: hidden; max-width: 100%; height: auto; display: block;}

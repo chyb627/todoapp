@@ -106,6 +106,7 @@ app.delete('/delete', function(요청, 응답){
 })
 
 
+// detail로 접속하면 detail.ejs를 보여줌
 // /detail/1 로 접속하면 1번게시물을 보여줌
 // /detail/2 로 접속하면 2번게시물을 보여줌
 app.get('/detail/:id', function(요청, 응답){ 
@@ -138,6 +139,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session'); 
 
+// 미들웨어 사용 (요청 중간에 뭔가 실행되는 코드)
 app.use(session({secret : '!cha159632', resave : true, saveUninitialized: false}));
 app.use(passport.initialize());
 app.use(passport.session()); 
@@ -146,9 +148,16 @@ app.get('/login', function(요청, 응답){
     응답.render('login.ejs')
   });
 
-  app.post('/login', passport.authenticate('local', {failureRedirect : '/fail'}), function(요청, 응답){
-    응답.redirect('/')
-  });
+  // 로그인 성공시 메인 화면으로 넘겨줌
+app.post('/login', passport.authenticate('local', {
+  failureRedirect : '/fail'}), function(요청, 응답){
+  응답.redirect('/')
+});
+
+// 로그인 실패시 다시 로그인 화면으로 넘겨줌
+app.get('/fail', function(요청, 응답){
+  응답.render('login.ejs')
+})
 
 app.get('/mypage', 로그인했니, function (요청, 응답) {
     console.log(요청.user);
@@ -159,7 +168,7 @@ app.get('/mypage', 로그인했니, function (요청, 응답) {
     if (요청.user) {
       next()
     } else {
-      응답.send('로그인안하셨는데요?')
+      응답.render('login.ejs', {사용자 : 요청.user})
     }
   }
 
@@ -247,3 +256,8 @@ app.post('/upload', upload.single('프로필'), function(요청, 응답){
 app.get('/image/:imageName', function(요청, 응답){
   응답.sendFile( __dirname + '/public/image/' + 요청.params.imageName )
 })
+
+// 회원가입 화면 만들기
+app.get('/signup', function(요청, 응답){
+  응답.render('signup.ejs')
+});

@@ -1,5 +1,5 @@
-var router = require('express').Router();
-
+var router = require('express').Router();  //npm으로 설치했던 express 라이브러리 쓰겠다
+                                           // 그안에 Router()라는 함수를 쓰겠다
 router.use(로그인했니);
 
 function 로그인했니(요청, 응답, next) {

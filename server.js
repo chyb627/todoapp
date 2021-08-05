@@ -16,13 +16,9 @@ MongoClient.connect('mongodb+srv://chyb627:!cha159632@chabiri.r7lh7.mongodb.net/
 
   db = client.db('todoapp');
 
-  // db.collection('post').insertOne({이름 : 'David', _id : 100 }, function(에러, 결과){
-  //     console.log('저장완료');
-  // }); 
-
   //app. listen으로 서버를 열수 있고, 어디다 열지 정해주기.
   //app. listen (서버띄울 포트번호, 띄운 후 실행할 코드 )
-  app.listen(8080, function () {          // database 접속이 완료되면
+  http.listen(8080, function () {          // database 접속이 완료되면
     console.log('listening on 8080')  // 내부 코드를 실행해라(노드js 서버 띄우는 코드)
   });
 
@@ -92,22 +88,15 @@ app.get('/list', function (요청, 응답) {
   });
 });
 
-app.get('/search', (요청, 응답) => {
-  console.log(요청.query);
-  db.collection('post').find({ 제목: 요청.query.value }).toArray((에러, 결과) => {
-    console.log(결과)
-  });
-});
-
 app.delete('/delete', function (요청, 응답) {
-  console.log(요청.body);
   요청.body._id = parseInt(요청.body._id);
   //요청.body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 "이승기-삭제"
-  db.collection('post').deleteOne(요청.body, function (에러, 결과) {  //삭제해주는 고마운 함수
+  db.collection('post').deleteOne({ _id: 요청.body._id, 작성자: 요청.user._id }, function (에러, 결과) {
     console.log('삭제완료');
+    console.log('에러', 에러)
     응답.status(200).send({ message: '성공했습니다' });
   })
-})
+});
 
 
 // detail로 접속하면 detail.ejs를 보여줌
@@ -139,22 +128,30 @@ app.put('/edit', function (요청, 결과) {
   });
 });
 
+//==================================================================================
+//=================================== login.ejs ====================================
+//==================================================================================
+
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 
-// 미들웨어 사용 (요청 중간에 뭔가 실행되는 코드)
+// app.use()는 미들웨어를 쓰겠다라는 뜻.
+// 서버는 요청을 받으면 응답해준는 기계인데,
+// 요청과 응답 사이에 뭔가 실행시키는 코드가 미들웨어이다.
 app.use(session({ secret: '!cha159632', resave: true, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// /login으로 방문시 login.ejs 페이지 보여주기
 app.get('/login', function (요청, 응답) {
   응답.render('login.ejs')
 });
 
+// 로그인시 아이디랑 비번이 맞는지 물어보기(passport라이브러리)
 // 로그인 성공시 메인 화면으로 넘겨줌
 app.post('/login', passport.authenticate('local', {
-  failureRedirect: '/fail'
+  failureRedirect: '/fail'  //로그인 인증 실패시 이동시켜줄 경로
 }), function (요청, 응답) {
   응답.redirect('/')
 });
@@ -164,28 +161,14 @@ app.get('/fail', function (요청, 응답) {
   응답.render('login.ejs')
 })
 
-app.get('/mypage', 로그인했니, function (요청, 응답) {
-  console.log(요청.user);
-  응답.render('mypage.ejs', { 사용자: 요청.user })
-})
-
-function 로그인했니(요청, 응답, next) {
-  if (요청.user) {
-    next()
-  } else {
-    응답.render('login.ejs', { 사용자: 요청.user })
-  }
-}
-
-
-
-passport.use(new LocalStrategy({
-  usernameField: 'id',
-  passwordField: 'pw',
-  session: true,
-  passReqToCallback: false,
-}, function (입력한아이디, 입력한비번, done) {  //사용자의 id,pw를 검증하는 부분
-  //console.log(입력한아이디, 입력한비번);
+// 아이디, 비밀번호를 검사해주는 코드
+passport.use(new LocalStrategy({      // local방식으로 아이디,비번 검사를 도와주는 부분
+  usernameField: 'id',              // 사용자가 제출한 아이디가 어디 적혔는지
+  passwordField: 'pw',              // 사용자가 제출한 비번이 어디 적혔는지
+  session: true,                   // 세션을 만들건지
+  passReqToCallback: false,        // id,pw말고 다른 정보검사가 필요한지
+}, function (입력한아이디, 입력한비번, done) {  //사용자의 id,pw를 검사하는 코드
+  console.log(입력한아이디, 입력한비번);
   db.collection('login').findOne({ id: 입력한아이디 }, function (에러, 결과) {
     if (에러) return done(에러)
     if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
@@ -197,6 +180,7 @@ passport.use(new LocalStrategy({
   })
 }));
 
+// 세션 만들고 세션아이디 발급해서 쿠키로 보내주기
 passport.serializeUser(function (user, done) {
   done(null, user.id)
 });
@@ -206,6 +190,23 @@ passport.deserializeUser(function (아이디, done) {
     done(null, 결과)
   })
 });
+
+//==================================================================================
+//=================================== mypage.ejs ===================================
+//==================================================================================
+
+app.get('/mypage', 로그인했니, function (요청, 응답) {
+  console.log(요청.user); // 요청.user는 로그인 한 유저의 DB상 정보이다.
+  응답.render('mypage.ejs', { 사용자: 요청.user })
+})
+
+function 로그인했니(요청, 응답, next) {
+  if (요청.user) {
+    next()
+  } else {
+    응답.render('login.ejs')
+  }
+}
 
 app.post('/add', function (요청, 응답) {
   console.log(요청.user._id)
@@ -286,11 +287,49 @@ app.get('/signup', function (요청, 응답) {
 });
 
 app.post('/signup', function (요청, 응답) {   //성공시 db에 저장되고 메인화면으로 
-  db.collection('login').insertOne({ id: 요청.body.id, pw: 요청.body.pw }, function (에러, 결과) {
-    응답.redirect('/')
-  })
+  db.collection('login').insertOne(
+    {
+      id: 요청.body.id,
+      pw: 요청.body.pw,
+      address: 요청.body.address,
+      mail: 요청.body.mail
+    }, function (에러, 결과) {
+      응답.redirect('/')
+    })
 })
 
 app.get('/fail', function (요청, 응답) {    //실패시 다시 회원가입 화면
   응답.render('singup.ejs')
 })
+
+//==================================================================================
+//=================================== search.ejs ===================================
+//==================================================================================
+
+app.get('/search', (요청, 응답) => {
+  console.log(요청.query);
+  db.collection('post').find({ 제목: 요청.query.value }).toArray((에러, 결과) => {
+    console.log(결과)
+  });
+});
+
+//==================================================================================
+//=================================== chat.ejst ====================================
+//==================================================================================
+
+const http = require('http').createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http);
+
+app.get('/chat', function(요청,응답){
+  응답.render('chat.ejs')
+});
+
+io.on('connection', function(){
+  console.log('연결되었어요');
+  
+  socket.on('인삿말', function(data){
+    console.log(data)
+  });
+  
+});

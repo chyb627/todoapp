@@ -17,9 +17,12 @@
   <!-- nav.html을 첨부해줘 ejs파일에서만가능 아니면 jquery써야함-->
   <%- include('nav.html') %>
 
-    <p>
-      <%= 사용자.id %>의 마이페이지입니다.
-    </p>
+    <section class="index-form">
+      <h2>
+        <%= 사용자.id %>님 반가워요. 
+        <br> 오늘도 할일을 채워나가요
+      </h2>
+    </section>
 
     <script src="/public/main.js" defer></script>
 </body>

@@ -19,18 +19,46 @@
 
     <section class="index-form">
       <h1>자기관리 일정 짜기, 지금시작!</h1>
-      <h2>내가 원하는 방식으로 일정을 생성, 디자인, 관리</h2>
-      <h2> 할 수 있는 자유를 제공 하는 플랫폼을 경험하세요.</h2>
+      <h2>내가 원하는 방식으로 일정을 생성, 디자인, 관리
+      <br> 할 수 있는 자유를 제공 하는 플랫폼을 경험하세요.</h2>
       <div class="btn-area">
         <button type="submit" onclick = "location.href = 'signup'">시작하기</button>
       </div><br>
-      <div class="img-area">
-      <img src="/public/image/manage.jpeg" ></div>
     </section>
 
+      <div style="overflow: hidden;">
+        <div class="img-container">
+          <div class="img-area">
+          <img src="/public/image/main1.jpg" >
+          </div>
+          <div class="img-area">
+            <img src="/public/image/main2.jpg" >
+          </div>
+          <div class="img-area">
+            <img src="/public/image/main3.png" >
+          </div>
+      </div>
+    </div>
 
+    <div class="img-button">
+    <button class="img-button1"> 1 </button>
+    <button class="img-button2"> 2 </button>
+    <button class="img-button3"> 3 </button>
+    </div> 
+    
+    <script>
+      document.querySelector('.img-button1').addEventListener('click', function(){
+        document.querySelector('.img-container').style.transform = 'translate(0vw)';
+      });
 
+      document.querySelector('.img-button2').addEventListener('click', function(){
+        document.querySelector('.img-container').style.transform = 'translate(-100vw)';
+      });
 
+      document.querySelector('.img-button3').addEventListener('click', function(){
+        document.querySelector('.img-container').style.transform = 'translate(-200vw)';
+      });
+    </script>
     <script src="/public/main.js" defer></script>
 </body>
 

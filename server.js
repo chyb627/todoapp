@@ -1,6 +1,6 @@
 const express = require('express'); //라이브러리를 첨부해줘!
 const app = express(); //라이브러리를 이용해서 새로운 객체를 만들어줘!
-const bodyParser = require('body-parser') //body-parser는 요청데이터 해석을 쉽게 도와준다
+const bodyParser = require('body-parser') //body-parser는 요청데이터 해석을 쉽게 도와준다. npm install body-parser  or  yarn add body-parser로 추가.
 app.use(bodyParser.urlencoded({ extended: true }))
 const MongoClient = require('mongodb').MongoClient;
 app.set('view engine', 'ejs');

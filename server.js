@@ -1,20 +1,26 @@
 const express = require('express'); //라이브러리를 첨부해줘!
 const app = express(); //라이브러리를 이용해서 새로운 객체를 만들어줘!
 const bodyParser = require('body-parser') //body-parser는 요청데이터 해석을 쉽게 도와준다. npm install body-parser  or  yarn add body-parser로 추가.
-app.use(bodyParser.urlencoded({ extended: true }))
 const MongoClient = require('mongodb').MongoClient;
-app.set('view engine', 'ejs');
-app.use('/public', express.static('public')); //static파일을 보관하기위해 public폴더를 쓰겠다
 const methodOverride = require('method-override')
+
+app.use(bodyParser.urlencoded({ extended: true })) // body-parser 라이브러리는 express 기본에 포함. (2021이후)
+app.set('view engine', 'ejs');  
+app.use('/public', express.static('public')); //static파일을 보관하기위해 public폴더를 쓰겠다
 app.use(methodOverride('_method'))
 
 
-var db;
-MongoClient.connect('mongodb+srv://chyb627:!cha159632@chabiri.r7lh7.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', function (에러, client) {
+let db; //페이지 전체에서 쓸 수 있는 전역변수 만들고,
+// { useUnifiedTopology: true }는 워닝메세지를 제거해준다.
+MongoClient.connect('mongodb+srv://chyb627:!cha159632@chabiri.r7lh7.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',{ useUnifiedTopology: true }, function (에러, client) {
   //연결되면 할일
   if (에러) { return console.log(에러) }
 
-  db = client.db('todoapp');
+  db = client.db('todoapp'); //client.db('todoapp')이라는 함수로 todoapp이라는 database에 접속해달라는 명령어.
+
+  console.log('client.db : ',client.db);
+
+  console.log('client.db(todoapp) : ',db);
 
   //app. listen으로 서버를 열수 있고, 어디다 열지 정해주기.
   //app. listen (서버띄울 포트번호, 띄운 후 실행할 코드 )
@@ -58,7 +64,9 @@ app.get('/write', function (요청, 응답) {
 // 이 때, 'POST'라는 이름을 가진 collection에 두개 데이터를 저장하기
 // {제목:'' , 날짜:''}
 app.post('/add', function (요청, 응답) {
-  응답.send('전송완료 list 목록에서 확인하세요');
+  console.log('add경로로 post 요청 할때 요청.body : ',요청.body);
+  alert('전송완료 list 목록에서 확인하세요');
+  // 응답.send('전송완료 list 목록에서 확인하세요');
 
   db.collection('counter').findOne({ name: '게시물갯수' }, function (에러, 결과) {
     console.log(결과.totalPost)
@@ -83,9 +91,10 @@ app.get('/list', function (요청, 응답) {
 
   //DB에 저장된 POST라는 Collection 안의 <조건>인 데어터를 꺼내줘
   db.collection('post').find().toArray(function (에러, 결과) {  // 데이터 다 찾아줘
-    console.log(결과);
-    응답.render('list.ejs', { posts: 결과 });
-  });
+    console.log('결과 : ',결과);
+    //.render()라는 함수에 둘째 파라미터를 이렇게 적어주면 list.ejs 파일을 렌더링함과 동시에 {posts: 결과} 라는 데이터를 함께 보내줄 수 있다. 
+    응답.render('list.ejs', { posts: 결과 });  // 정확히 말하면 결과라는 데이터를 posts 라는 이름으로 ejs 파일에 보내주라는 의미이다.
+  });                                        // list.ejs 파일에서 데이터를 가지고 여기저기 넣어주면 된다.
 });
 
 app.delete('/delete', function (요청, 응답) {
@@ -208,9 +217,11 @@ function 로그인했니(요청, 응답, next) {
   }
 }
 
+// 폼에서 뭔가 전송시킬 때마다 DB에 데이터를 저장한다.
 app.post('/add', function (요청, 응답) {
   console.log(요청.user._id)
-  응답.send('전송완료');
+  //응답.send() 부분은 항상 존재해야한다. 전송이 성공하든 실패하든 뭔가 서버에서 보내주어야 한다. 안그러면 브라우저가 멈춘다. 간단한 응답코드나 리다이렉트(페이지강제이동)를 해주는 코드도 있다.
+  응답.send('전송완료'); 
   db.collection('counter').findOne({ name: '게시물갯수' }, function (에러, 결과) {
     var 총게시물갯수 = 결과.totalPost;
     var post = { _id: 총게시물갯수 + 1, 작성자: 요청.user._id, 제목: 요청.body.title, 날짜: 요청.body.date }
@@ -289,7 +300,7 @@ app.get('/signup', function (요청, 응답) {
 app.post('/signup', function (요청, 응답) {   //성공시 db에 저장되고 메인화면으로 
   db.collection('login').insertOne(
     {
-      id: 요청.body.id,
+      id: 요청.body.id,                      // MongoDB에선 자료들을 서로 구분하기 위해 _id가 꼭 있어야 한다. 일종의 출석번호라고 생각하면 된다.
       pw: 요청.body.pw,
       address: 요청.body.address,
       mail: 요청.body.mail

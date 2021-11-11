@@ -13,9 +13,10 @@
     </div>
 
     <script>
-      $('#search').click(function () {
-        var 입력한값 = $('#search-input').val()
-        window.location.replace('/search?value=' + 입력한값) //url을 바꿔줘
+      $('#search').click(() => {
+        var 입력한값 = $('#search-input').val();
+        window.location.replace('/search') //url을 바꿔줘
+        console.log('999999999999',search);
       });
 
     </script>
@@ -41,23 +42,27 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
     <script>
-
-      $('.delete').click(function (e) {
+      // $.ajax 코드를 이상한 코드로 감싼다.
+      // 이 코드의 뜻은 delete라는 클래스명을 가진 요소를 클릭하면 내부 $.ajax 코드를 실행해주세요~ 이다. (jQuery 문법이다.)
+      // 이 delete라는 클래스명을 가진 버튼을 클릭할 때만 ajax를 실행해준다. 
+      $('.delete').click((e) => {
         var 글번호 = e.target.dataset.id; //e.target은 지금 클릭한 것
         var 지금누른거 = $(this);          //this는 지금 이벤트 동작하는 곳
         $.ajax({
           method: 'DELETE',
-          url: '/delete',
-          data: { _id: 글번호 },   //요청과 함께 보낼데이터, 지금 내가 클릭한 버튼의 id를 여기에 집어넣기
-        }).done(function (결과) {
+          url: '/delete/:id',
+          // data: {_id: 글번호},   //요청과 함께 보낼데이터, 지금 내가 클릭한 버튼의 id를 여기에 집어넣기
+        }).done((결과) => {
+          //.done은 AJAX 성공시 실행할 코드를 여기에 적어준다
           //페이지를 강제로 새로고침해줘
-          //삭제 버튼을 누른 <li>요소를 제거해줘, 안보이게 해줘
-          console.log('성공했셈');
-          지금누른거.parent('li').fadeOut();
+          //삭제 버튼을 누른 li요소를 제거해줘, 안보이게 해줘
+          console.log('delete 성공:::::::::');
+          // 지금누른곳(이벤트가 동작하는 곳)의 부모(상위요소)중에 <li>태그가 있으면 사라지게 해달라는 뜻
+          지금누른거.parent('li').fadeOut();   
 
-        }).fail(function (xhr, textStatus, errorThrown) {
-          //요청이 실패했을때 코드는 여기에
-          console.log(xhr, textStatus, errorThrown);
+        }).fail( (xhr, textStatus, errorThrown) => {
+          //.fail은 요청이 실패했을때 코드는 여기에 적어둔다. 삭제 실패시 안내메세지 보여주는 기능.
+          console.log('delete Fail:::::::::::::',xhr, textStatus, errorThrown);
         });
       })
 

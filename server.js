@@ -3,16 +3,17 @@ const app = express(); //라이브러리를 이용해서 새로운 객체를 만
 const bodyParser = require('body-parser') //body-parser는 요청데이터 해석을 쉽게 도와준다. npm install body-parser  or  yarn add body-parser로 추가.
 const MongoClient = require('mongodb').MongoClient;
 const methodOverride = require('method-override')
+require('dotenv').config()
 
 app.use(bodyParser.urlencoded({ extended: true })) // body-parser 라이브러리는 express 기본에 포함. (2021이후)
 app.set('view engine', 'ejs');  
-app.use('/public', express.static('public')); //static파일을 보관하기위해 public폴더를 쓰겠다
-app.use(methodOverride('_method'))
+app.use('/public', express.static('public')); //static파일을 보관하기위해 public폴더를 쓰겠다, Node짱에게 나 public 폴더도 있다라고 알려주는 것.
+app.use(methodOverride('_method')) // npm install method-override 로 설치해주기
 
 
 let db; //페이지 전체에서 쓸 수 있는 전역변수 만들고,
 // { useUnifiedTopology: true }는 워닝메세지를 제거해준다.
-MongoClient.connect('mongodb+srv://chyb627:!cha159632@chabiri.r7lh7.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',{ useUnifiedTopology: true }, function (에러, client) {
+MongoClient.connect(process.env.DB_URL,{ useUnifiedTopology: true }, function (에러, client) {
   //연결되면 할일
   if (에러) { return console.log(에러) }
 
@@ -24,7 +25,7 @@ MongoClient.connect('mongodb+srv://chyb627:!cha159632@chabiri.r7lh7.mongodb.net/
 
   //app. listen으로 서버를 열수 있고, 어디다 열지 정해주기.
   //app. listen (서버띄울 포트번호, 띄운 후 실행할 코드 )
-  http.listen(8080, function () {          // database 접속이 완료되면
+  http.listen(process.env.PORT, function () {          // database 접속이 완료되면
     console.log('listening on 8080')  // 내부 코드를 실행해라(노드js 서버 띄우는 코드)
   });
 
@@ -68,10 +69,17 @@ app.post('/add', function (요청, 응답) {
   alert('전송완료 list 목록에서 확인하세요');
   // 응답.send('전송완료 list 목록에서 확인하세요');
 
+  //counter라는 콜렉션에서 totalPost라는 총 게시물 갯수 숫자를 가져와서 총게시물갯수라는 변수에 저장함. 그다음 밑에 코드 실행.
+  //findOne함수를 쓰면 collection 내에서 원하는 문서를 쉽게 찾을 수 있다.
+  //그럼 찾은 결과는 function내의 결과라는 이름의 변수에 담겨온다.
+  //그럼 totalPost라는 자료도 출력가능하다.
+  //그리고 그 다음 insertOne을 써서 제대로된 _id와 함께 자료를 저장한다.
+  //그리고 응답.send라는 코드를 이용해 응답해준다. (응답.어쩌구는 꼭들어있어야 한다.)
   db.collection('counter').findOne({ name: '게시물갯수' }, function (에러, 결과) {
-    console.log(결과.totalPost)
+    console.log('결과.totalPost', 결과.totalPost);
     var 총게시물갯수 = 결과.totalPost;
 
+    // insertOne 함수 안에 _id : 1 이라는 항목을 쓰면 번호달아서 저장하기 끝.
     db.collection('post').insertOne({ _id: 총게시물갯수 + 1, 제목: 요청.body.title, 날짜: 요청.body.date }, function () {
       console.log('저장완료');
 
@@ -98,8 +106,14 @@ app.get('/list', function (요청, 응답) {
 });
 
 app.delete('/delete', function (요청, 응답) {
+  //parseInt라는 함수는 '1'이라는 문자를 정수 1로 바꿔주는 고마운 함수이다.
+  // list 페이지를 새로고침해서 AJAX 요청해보면 데이터가 삭제된다.
   요청.body._id = parseInt(요청.body._id);
-  //요청.body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 "이승기-삭제"
+  // 요청.body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 "이승기-삭제"
+  // deleteOne 함수를 쓰면 원하는 데이터를 삭제 가능하다
+  // deleteOne(삭제원하는 데이터이름, function(){}) 이렇게 쓰면 된다.
+  // 그리고 AJAX 요청시 삭제원하는 데이터이름은 요청.body라는 곳에 담겨온다.
+  // 그래서 그 정보를 deleteOne에 집어넣으면 삭제원하는 데이터 게시물을 삭제할 수 있다.
   db.collection('post').deleteOne({ _id: 요청.body._id, 작성자: 요청.user._id }, function (에러, 결과) {
     console.log('삭제완료');
     console.log('에러', 에러)
@@ -111,9 +125,15 @@ app.delete('/delete', function (요청, 응답) {
 // detail로 접속하면 detail.ejs를 보여줌
 // /detail/1 로 접속하면 1번게시물을 보여줌
 // /detail/2 로 접속하면 2번게시물을 보여줌
+// 콜론(:)기호를 붙여주면 누군가  /detail/뒤에 "아무문자열이나 입력하면 ~" 이라는 소리이다
+// /detail 뒤의 무작위의 문자를 id라고 부르겠다 라는 뜻
+// detail/1 로 방문하면 1번 게시물을 보내야 한다.
 app.get('/detail/:id', function (요청, 응답) {
+  // db.어쩌구.findOne()이라는 함수를 사용
+  // 이 함수는 db에서 원하는 게시물 하나 찾고싶을 때 사용한다.
+  // 사용법은 .findOne({원하는게시물정보}, function(){ 완료시 실행할 코드 }) 이렇게 하면 된다.
   db.collection('post').findOne({ _id: parseInt(요청.params.id) }, function (에러, 결과) {
-    //console.log(결과);
+    // console.log(결과);
     응답.render('detail.ejs', { data: 결과 })
 
   })
@@ -128,9 +148,12 @@ app.get('/edit/:id', function (요청, 응답) {
   })
 })
 
+// 사용자가 /edit로 PUT요청을 하면 post라는 콜렉션에 있는 {_id : 요청.body.id } 데이터를 찾아서 
+// { 제목 : 요청.body.title , 날짜 : 요청.body.date } 로 바꿔줘 라는 뜻.
 app.put('/edit', function (요청, 결과) {
-  //폼에담긴 제목데이터, 날짜데이터를 가지고 
-  //db.collection에다가 업데이트함
+  // 폼에담긴 제목데이터, 날짜데이터를 가지고 
+  // db.collection에다가 업데이트함
+  // DB 데이터를 수정하려면 updateOne을 쓴다. 사용법은 updateOne( 1.업데이트할게시물찾기, 2.수정할내용, 3.콜백함수) 
   db.collection('post').updateOne({ _id: parseInt(요청.body.id) }, { $set: { 제목: 요청.body.title, 날짜: 요청.body.date } }, function () {
     console.log('수정완료')
     응답.redirect('/list')
@@ -209,15 +232,27 @@ app.get('/mypage', 로그인했니, function (요청, 응답) {
   응답.render('mypage.ejs', { 사용자: 요청.user })
 })
 
+// 로그인했니()함수는 "요청.user 가 있으면 next()로 통과시켜주시고요, 없으면 에러메세지를 응답.send() 해주세요~" 라는 뜻
 function 로그인했니(요청, 응답, next) {
+  // 요청.user는 로그인 한 유저의 DB상 정보입니다. (아이디, 비번, 유저명 등)
+  // 하지만 그냥 출력해보면 아무것도 없고, 이걸 사용하려면 deserializeUser 라는 부분 기능개발이 필요합니다. 
+  // deserializeUser 라는 부분은 고객의 세션아이디를 바탕으로 이 유저의 정보를 DB에서 찾아주세요~ 역할을 하는 함수입니다. 
+  // 그리고 그 결과를 요청.user 부분에 꽂아줍니다. 
   if (요청.user) {
     next()
   } else {
     응답.render('login.ejs')
+    alert('로그인 먼저 해주세요');
   }
 }
 
 // 폼에서 뭔가 전송시킬 때마다 DB에 데이터를 저장한다.
+// 1. 누군가 /add 경로로 post 요청을 한다.
+// 2. counter라는 콜렉션에서 총게시물갯수 저장해놓은 문서를 찾는다. 그 찾은 문서는 결과라는 변수에 담겨온다. 
+// 3. 결과.totalPost하면 총게시물 갯수가 출현한다. 그것을 총게시물갯수라는 변수에 저장해서 사용한다.
+// 4. post라는 콜렉션에 insertOne을 이용해 게시물을 추가한다. 추가할 때 _id를 총게시물갯수를 이용해 제대로 부여해준다.
+// 5. 성공했다고 응답.send로 브라우저에게 글자를 보낸다. 응답.render, 응답.redirect 이런 것도 이용가능하다. 
+// counter라는 콜렉션 내의 'totalPost'라는 값도 1 증가시켜야한다. (totalPost가 총게시물갯수 세는 역할이라면)
 app.post('/add', function (요청, 응답) {
   console.log(요청.user._id)
   //응답.send() 부분은 항상 존재해야한다. 전송이 성공하든 실패하든 뭔가 서버에서 보내주어야 한다. 안그러면 브라우저가 멈춘다. 간단한 응답코드나 리다이렉트(페이지강제이동)를 해주는 코드도 있다.
@@ -226,6 +261,11 @@ app.post('/add', function (요청, 응답) {
     var 총게시물갯수 = 결과.totalPost;
     var post = { _id: 총게시물갯수 + 1, 작성자: 요청.user._id, 제목: 요청.body.title, 날짜: 요청.body.date }
     db.collection('post').insertOne(post, function (에러, 결과) {
+      // counter라는 콜렉션 내의 자료를 수정하고 싶으면 updateOne을 쓰면 된다.
+      // updateOne( {이런 이름의 자료를}, {이렇게 수정해주세요}, function (에러, 결과) )
+      // 왼쪽에 {name:'게시물갯수'} 이렇게 자료를 찾을 수 있는 이름이라든지 쿼리문을 적어준다.
+      // 가운데 수정할 값을 입력해준다. { $set : { totalPost : 100 } } 이렇게 넣어서 값을 아예 100으로 변경할 수도 있고 { $inc : { totalPost : 5 } } 이렇게 넣어서 값을 5만큼 더해줄 수도 있다.
+      // 오른쪽은 콜백함수. 수정이 실패나 성공시 실행할 코드
       db.collection('counter').updateOne({ name: '게시물갯수' }, { $inc: { totalPost: 1 } }, function (에러, 결과) {
         if (에러) { return console.log(에러) }
       })
@@ -317,12 +357,14 @@ app.get('/fail', function (요청, 응답) {    //실패시 다시 회원가입 
 //=================================== search.ejs ===================================
 //==================================================================================
 
-app.get('/search', (요청, 응답) => {
-  console.log(요청.query);
-  db.collection('post').find({ 제목: 요청.query.value }).toArray((에러, 결과) => {
+app.get('/search', (요청, 응답)=>{
+  
+  console.log(요청.query.value);
+  db.collection('post').find( { $text : { $search: 요청.query.value }} ).toArray((에러, 결과)=>{
     console.log(결과)
-  });
-});
+    응답.render('search.ejs', {posts : 결과})
+  })
+})
 
 //==================================================================================
 //=================================== chat.ejst ====================================

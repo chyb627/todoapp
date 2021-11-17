@@ -5,7 +5,7 @@
   <!-- nav.html을 첨부해줘 ejs파일에서만가능 아니면 jquery써야함-->
   <%- include('nav.html') %>
 
-    <h4 class="m1-2 my-3 text-center"> 내가 추가한 할일 목록</h4>
+    <h4 class="m1-2 my-3 text-center"> 내가 추가한 할일 목록 </h4>
 
     <div class="container input-group mb-2">
       <input class="form-control" id="search-input">
@@ -33,11 +33,11 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
     <script>
-      $('#search').click(() => {
+      $('#search').click(()=>{
         var 입력한값 = $('#search-input').val();
-        window.location.replace('/search') //url을 바꿔줘
+        window.location.replace('/search?value=' + 입력한값)
       });
-
+    
     </script>
 
     <script>

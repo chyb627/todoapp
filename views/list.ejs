@@ -12,15 +12,6 @@
       <button class="input-group-append btn btn-danger" id="search">검색</button>
     </div>
 
-    <script>
-      $('#search').click(() => {
-        var 입력한값 = $('#search-input').val();
-        window.location.replace('/search') //url을 바꿔줘
-        console.log('999999999999',search);
-      });
-
-    </script>
-
     <!-- 서버에서 가져온 할일 리스트 -->
 
     <div class="container">
@@ -40,6 +31,14 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <script>
+      $('#search').click(() => {
+        var 입력한값 = $('#search-input').val();
+        window.location.replace('/search') //url을 바꿔줘
+      });
+
+    </script>
 
     <script>
       // $.ajax 코드를 이상한 코드로 감싼다.

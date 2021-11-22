@@ -18,3 +18,5 @@ router.get('/pants', function(요청, 응답){
 }); 
 
 module.exports = router;
+// Node.js 환경에서 JS파일들을 불러와서 쓸 수 있는데 
+// 그 문법이 바로 require() 이것과 module.exports 이다.
